@@ -65,6 +65,8 @@ typings/
 # Output of 'npm pack'
 *.tgz
 
+.gitignore
+
 # Yarn Integrity file
 .yarn-integrity
 
@@ -104,5 +106,3 @@ dist
 .tern-port
 
 #public/
-src/
-scripts/

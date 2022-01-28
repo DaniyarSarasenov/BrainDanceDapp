@@ -1,0 +1,171 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@font-face {
+    font-family: "Titanone-Bold";
+    src: url('./assets/fonts/TitanOne-Regular.ttf');
+}
+
+@font-face {
+    font-family: "Titanone-Regular";
+    src: url('./assets/fonts/TitanOne-Regular.ttf');
+}
+
+@font-face {
+    font-family: "Titanone-Regular";
+    src: url('./assets/fonts/TitanOne-Regular.ttf');
+}
+
+@font-face {
+    font-family: "IBMPlexMono-Regular";
+    src: url('./assets/fonts/IBMPlexMono-Regular.ttf');
+}
+
+.cblue {
+    color: #99e2ff;
+}
+
+.cgreen {
+    color: #b3fec7;
+}
+
+.cpink {
+    color: #fea4d4;
+}
+
+.cpurple {
+    color: #c5c5ff;
+}
+
+.cyellow {
+    color: #ffe780;
+}
+
+.cpyellow {
+    color: #ffe780;
+}
+
+.clblue {
+    color: #bbefff;
+}
+
+.App {
+    text-align: center;
+}
+
+body {
+    background-color: #020202;
+    font-family: Titanone-Bold;
+}
+
+.home-page {
+    height: 100vh;
+}
+.container_ {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+.animation-wrapper {
+    flex: 1 1;
+    height: 100%;
+    width: 50%;
+    margin: 0 40px 0 0;
+    border-radius: 20px;
+    overflow: hidden;
+}
+.characters_ {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    padding: 40px;
+}
+
+iframe {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.home-page .container_ .button-wrapper {
+    position: absolute;
+    left: calc(50% - 150px);
+    width: 300px;
+    top: calc(50% - 150px);
+    height: 300px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    background: #000;
+    border-radius: 20px;
+    box-shadow: 0 0 15px 1px #2ec4ff;
+}
+
+.home-page .container_ .button-wrapper .title {
+    font-family: "Lato";
+    font-size: 40px;
+    font-weight: 700;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+.home-page .container_ .button-wrapper .info {
+    display: flex;
+    flex-direction: column;
+    margin: 10px 0;
+}
+
+.home-page .container_ .button-wrapper .mint-wrapper {
+    margin: 8px 0 0;
+}
+
+.home-page .container_ .button-wrapper .info .account-info, .home-page .container_ .button-wrapper .info .contract-info {
+    display: flex;
+    justify-content: center;
+}
+
+.mint {
+    background: linear-gradient(45deg,#e200ff,#8700ff);
+    border: none;
+    outline: none;
+    background-color: #000;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 20px;
+    font-family: "Segoe UI",Tahoma,Geneva,Verdana,sans-serif;
+    transition: all .3s;
+    width: 200px;
+    height: 40px;
+    border-radius: 100px;
+    transition: all .7s;
+    padding: unset!important;
+}
+
+.home-page .container_ .button-wrapper .info .item {
+    flex: 1 1;
+    margin: 0 20px 0 0;
+    display: flex;
+    justify-content: center;
+}
+
+.home-page .container_ .button-wrapper .info .item:last-child {
+    margin-right: 0;
+}
+
+.home-page .container_ .button-wrapper .info .item label {
+    font-family: "Lato";
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+    margin: 0 6px 0 0;
+    color: #bbb;
+}
+
+.home-page .container_ .button-wrapper .info .item span {
+    font-family: "Lato";
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+    margin: 0;
+}
