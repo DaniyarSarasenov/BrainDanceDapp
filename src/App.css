@@ -110,6 +110,10 @@ iframe {
     text-align: center;
 }
 
+.title, .item span{
+    color: #bbb !important;
+}
+
 .home-page .container_ .button-wrapper .info {
     display: flex;
     flex-direction: column;
@@ -168,4 +172,45 @@ iframe {
     font-weight: 700;
     text-align: center;
     margin: 0;
+}
+
+.quantity-input {
+    width: 80%;
+    border-radius: 7px;
+    background-color: #efefef;
+    font-size: 23px;
+    padding: 5px;
+    text-align: center;
+    color: rgb(17, 16, 16);
+    margin: 10px 0;
+}
+
+.ReactModal__Overlay.ReactModal__Overlay--after-open {
+    background-color: rgb(64 58 58 / 75%) !important;
+}
+
+.web3modal-provider-container div {
+    margin-top: 12px !important;
+    text-align: center;
+    font-family: "Lato";
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.ReactModal__Overlay{
+    cursor: pointer;
+}
+
+.sc-dlnjPT {
+    background: linear-gradient(
+        45deg
+        ,#e200ff,#8700ff);
+            border: none;
+            outline: none;
+            background-color: #000;
+    color: rgb(245, 241, 241);
+    font-weight: normal;
+    padding: 3px 5px;
+    border-radius: 5px;
+    opacity: 0.8;
 }

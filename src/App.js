@@ -4,29 +4,56 @@ import 'react-notifications/lib/notifications.css';
 
 import './App.css';
 import { useEffect, useState } from "react";
-import contractAbi from "./abi/doodle.json";
+import contractAbi from "./abi/braindance.json";
 import wlUserList from "./wl/user.json";
 import publicProof from "./wl/public.json";
-import Web3Modal from "web3modal";
-import WalletConnectProvider from 'web3-providers';
-import WalletLink from "walletlink";
+import { fromWei, toWei } from "web3-utils";
 
-const contractAddress1 = "0x0e099d20e5f8fAD56C3BDb18Fe499Bc958248251"; // Main Net
+import goldUserList from "./wl/gold.json";
+import silverUserList from "./wl/silver.json";
+import { BigNumber } from "ethers/utils";
+import medatmaskimg from "./assets/imgs/metamask.svg";
+
+import moment from "moment";
+
+import Modal from "react-modal";
+
+const customStyles = {
+  content: {
+    top: '50%',
+    left: '50%',
+    right: 'auto',
+    bottom: 'auto',
+    marginRight: '-50%',
+    borderRadius: 20,
+    width: 350,
+    height: 200,
+    transform: 'translate(-50%, -50%)',
+  },
+};
+
+Modal.setAppElement('#root');
+
+const contractAddress1 = "0xB566AFc04ED4b65BCC840ab585fa8023a3DB56CE"; // Main Net
 const contratAddress2 = "0x0e099d20e5f8fAD56C3BDb18Fe499Bc958248251"; //Main Net
 const contratAddress3 = "0x0e099d20e5f8fAD56C3BDb18Fe499Bc958248251"; // Main Net
 const sale = true;
-const publicSale = true;
+const publicSale = false;
 
 function App() {
   var web3;
   var nftContract;
   var address;
   var chainId;
+  
   const [maxQuantity] = useState(5);
   const [quantity, setQuantity] = useState(0);
   const [walletAddress, setWalletAddress] = useState('');
   const [legendaryState, setLegendaryState] = useState(0);
-  const [leftToken, setLeftToken] = useState(2500);
+  const [leftToken, setLeftToken] = useState(10101);
+  const [modalIsOpen, setIsOpen] = useState(true);
+  const [countTime, setCountTime] = useState("00:00");
+
   if(window.ethereum != null) {
   	web3 = new Web3(window.ethereum);
   }
@@ -36,6 +63,10 @@ function App() {
       await window.ethereum.request({method: 'eth_requestAccounts'}).then((data) => {
         address = data[0];
         setWalletAddress(address);
+        
+        if (modalIsOpen) {
+          setIsOpen(false);
+        }
       });
     } else {
       notificationfunc("error", 'Can\'t Find Metamask Wallet. Please install it and reload again to mint NFT.');
@@ -62,13 +93,75 @@ function App() {
 
             const { MerkleTree } = require('merkletreejs')
             const keccak256 = require('keccak256');
-            const wlUsers = wlUserList;
+            let wlUsers = [];;
+            // console.log("read--", "$" + walletAddress + "$", silverUserList.indexOf(walletAddress.toString()));
+            let groupState = 0;
+  
+            let whiteuser = false;
+            for(var key in goldUserList) {
+              if (goldUserList[key].toLowerCase() === walletAddress.toLowerCase()) {
+                wlUsers = goldUserList;
+                groupState = 1;
+                whiteuser = true;
+                break;
+              }
+            }
+
+            for(var key1 in silverUserList) {
+              if (silverUserList[key1].toLowerCase() === walletAddress.toLowerCase()) {
+                wlUsers = silverUserList;
+                groupState = 2;
+                whiteuser = true;
+                break;
+              }
+            }
+
+            if (!whiteuser) {
+              notificationfunc("error", 'You are not in whitelist.');
+              return;  
+            }
+            // if (goldUserList.indexOf(walletAddress) !== -1) {
+            //   wlUsers = goldUserList;
+            //   groupState = 1;
+
+            // } else if (silverUserList.indexOf(walletAddress) !== -1) {
+            //   wlUsers = silverUserList;
+            //   groupState = 2;
+            // } else {
+            //   notificationfunc("error", 'You are not in whitelist.');
+            //   return;
+            // }
+
+            let value = 1;
+            if (groupState == 1) {
+              value = value * 0.06;
+            } else if (groupState == 2){
+              value = value * 0.09;
+            }
+
+            let valuestr = value * quantity;
 
             const leaves = wlUsers.map(x => keccak256(x));
             const tree = new MerkleTree(leaves, keccak256);
             const root = tree.getRoot().toString('hex');
+            // console.log("sssss");
+            // console.log(tree.toString());
             const leaf = keccak256(walletAddress);
-            let userIndex = wlUsers.indexOf(walletAddress);
+            
+            let userIndex = -1;
+            for(var key2 in wlUsers) {
+              if (wlUsers[key2].toLowerCase() === walletAddress.toLowerCase()) {
+                userIndex = key2;
+                break;
+              }
+            }
+            if (userIndex == -1) {
+              notificationfunc("error", 'You are not in the whitelist.');
+              return;
+            }
+            // let userIndex = wlUsers.indexOf(walletAddress);
+
+
             let hexProof = tree.getHexProof(leaf);
 
             //Public Sale
@@ -76,11 +169,16 @@ function App() {
               hexProof = publicProof;
               userIndex = 0;
             }
+// console.log(walletAddress, chainId);
+
+// console.log(valuestr.toString(), toWei(valuestr.toString(), "ether"));
+
+//             console.log(hexProof, userIndex, groupState);
             if(chainId === '0x1') {
               const contract = new web3.eth.Contract(nftContract, contractAddress1);
               if (hexProof.length){
-                await contract.methods.mint(walletAddress, quantity, hexProof, userIndex).send({
-                  value: 50000000000000000 * quantity,
+                await contract.methods.mintVip(quantity, hexProof, userIndex, groupState).send({
+                  value: toWei(valuestr.toString(), "ether"),
                   from: walletAddress
                 })
                 .then(data => {
@@ -105,9 +203,9 @@ function App() {
     if(!walletAddress)
       await connectWallet();
     
-    console.log(walletAddress);
+    // console.log(walletAddress);
 
-    // mintToken();
+    mintToken();
   };
 
   const nextLegendary = (nextNumber) => {
@@ -137,7 +235,28 @@ function App() {
     notificationfunc("info", "Mint presale will be live on Jan 8th");
   }
 
+  const checkMerkleTree = () => {
+    const { MerkleTree } = require('merkletreejs')
+    const keccak256 = require('keccak256');
+    const wlUsers = silverUserList;
+
+    const leaves = wlUsers.map(x => keccak256(x));
+    const tree = new MerkleTree(leaves, keccak256);
+    const root = tree.getRoot().toString('hex');
+    console.log(root);
+
+    for (var key in silverUserList) {
+      var ccAddy = silverUserList[key]
+      const leaf = keccak256(ccAddy);
+      let userIndex = wlUsers.indexOf(ccAddy);
+      let hexProof = tree.getHexProof(leaf);
+      console.log(hexProof.length);
+    }
+
+  }
+
   useEffect(() => {
+    checkMerkleTree();
     const checkConnection = async () => {
       // Check if browser is running Metamask
       let web3;
@@ -168,17 +287,34 @@ function App() {
               if (err){
                 console.log(err);
               } else {
-                let leftTokenNumber = 2500 - result;
+                let leftTokenNumber = 10101 - result;
                 if (leftTokenNumber < 0) leftTokenNumber = 0;
                 setLeftToken(leftTokenNumber);
               }
             })
-            
           }
         }
       }, 2000);
     }
+
+    // console.log(new Date("Jan 29 2022 09:00:00 GMT-04").getTime() + 72 * 3600 * 1000);
+    console.log(new Date(moment("Jan 29 2022 09:00:00 GMT-04")).getTime());
+    console.log(new Date('Jan 29 2022 09:00:00 GMT-0400').toString());
+    //console.log(moment(new Date()).tz(SETTINGS.system_timezone).format('YYYY-MM-DD HH:mm'));
+    const setCalcTime = () => {
+      const remaintime = (new Date(moment("Jan 29 2022 09:00:00 GMT-04")).getTime() + 72 * 3600 * 1000 - new Date().getTime())/ 1000;
+      const timestring = Math.floor(remaintime / 3600) + ":" + Math.floor((remaintime % 3600) / 60);
+      // console.log(timestring);
+      setCountTime(timestring);
+    }
+    setCalcTime();
+    setInterval( async () => {
+      setCalcTime();
+    }, 1000 );
+
   }, []);
+
+  
 
   return (
     <div className="App">
@@ -192,43 +328,48 @@ function App() {
             <iframe title="by" src="./girl/girl.html"></iframe>
             </div>
           </div>
-          <div class="button-wrapper" >
-              <div class="title" >Not started</div>
-              <div class="info" >
-                <div class="account-info" >
-                  <div class="item" >
-                    <label >Token:</label><span >0</span>
+          <div className="button-wrapper" >
+              <div className="title" >started</div>
+              <div className="info" >
+                <div className="account-info" >
+                  <div className="item" >
+                    <label >Token:</label><span >{leftToken}</span>
                   </div>
                 </div>
-                <div class="contract-info" >
-                  <div class="item" >
-                    <label >Remaining:</label><span >0</span>
+                <div className="contract-info" >
+                  <div className="item" >
+                    <label >Time Left : </label><span >{countTime}</span>
                   </div>
                 </div>
               </div>
-              <div class="mint-wrapper" >
-                <button type="button" class="mint" disabled="" onClick={connectAndMint}>Jack In</button>
+              
+              <input className="quantity-input" type="number" value={quantity} onChange={(e) => setQuantity(e.target.value < 0 || e.target.value > 2 ? 0  : (e.target.value).toString().length > 1 ? (e.target.value).toString()[1] : e.target.value  )} placeholder={0} min="0" max="2"/>
+              <div className="mint-wrapper" >
+                <button type="button" className="mint" disabled="" onClick={connectAndMint}>Jack In</button>
               </div>
             </div>
         </div>
       </div>
-      {/* <Modal
+
+      
+
+      <Modal
         isOpen={modalIsOpen}
-        onAfterOpen={afterOpenModal}
-        onRequestClose={closeModal}
+        // onAfterOpen={afterOpenModal}
+        // onRequestClose={closeModal}
         style={customStyles}
         contentLabel="Example Modal"
       >
-        <div class="sc-eCApGN cjAFRf web3modal-provider-wrapper">
-          <div class="sc-hKFyIo jcNZzC web3modal-provider-container">
-            <div class="sc-bdnylx jMhaxE web3modal-provider-icon">
+        <div className="sc-eCApGN cjAFRf web3modal-provider-wrapper" onClick={connectWallet}>
+          <div className="sc-hKFyIo jcNZzC web3modal-provider-container">
+            <div className="sc-bdnylx jMhaxE web3modal-provider-icon">
             <img src={medatmaskimg} width={45} alt="Left Arrow"/>
               </div>
-            <div class="sc-gtssRu bktcUM web3modal-provider-name">MetaMask</div>
-            <div class="sc-dlnjPT eFHlqH web3modal-provider-description">Connect to your MetaMask Wallet</div>
+            <div className="sc-gtssRu bktcUM web3modal-provider-name">MetaMask</div>
+            <div className="sc-dlnjPT eFHlqH web3modal-provider-description">Connect to your MetaMask Wallet</div>
             </div>
         </div>
-        </Modal> */}
+        </Modal>
       <NotificationContainer/>
     </div>
   );
