@@ -35,8 +35,8 @@ const customStyles = {
 Modal.setAppElement('#root');
 
 const contractAddress1 = "0xB566AFc04ED4b65BCC840ab585fa8023a3DB56CE"; // Main Net
-const contratAddress2 = "0x0e099d20e5f8fAD56C3BDb18Fe499Bc958248251"; //Main Net
-const contratAddress3 = "0x0e099d20e5f8fAD56C3BDb18Fe499Bc958248251"; // Main Net
+const contratAddress2 = "0xB566AFc04ED4b65BCC840ab585fa8023a3DB56CE"; //Main Net
+const contratAddress3 = "0xB566AFc04ED4b65BCC840ab585fa8023a3DB56CE"; // Main Net
 const sale = true;
 const publicSale = false;
 
@@ -50,7 +50,7 @@ function App() {
   const [quantity, setQuantity] = useState(0);
   const [walletAddress, setWalletAddress] = useState('');
   const [legendaryState, setLegendaryState] = useState(0);
-  const [leftToken, setLeftToken] = useState(10101);
+  const [leftToken, setLeftToken] = useState(2000);
   const [modalIsOpen, setIsOpen] = useState(true);
   const [countTime, setCountTime] = useState("00:00");
 
@@ -175,21 +175,35 @@ function App() {
 
 //             console.log(hexProof, userIndex, groupState);
             if(chainId === '0x1') {
-              const contract = new web3.eth.Contract(nftContract, contractAddress1);
-              if (hexProof.length){
-                await contract.methods.mintVip(quantity, hexProof, userIndex, groupState).send({
-                  value: toWei(valuestr.toString(), "ether"),
-                  from: walletAddress
-                })
-                .then(data => {
-                  notificationfunc("success", 'Successfully Minted!');
-                })
-                .catch(err => {
-                  notificationfunc("error", err.message);
-                })
-              } else {
-                notificationfunc("warning", "Please check your wallet.");
-              }
+              await web3.eth.getBalance(walletAddress, function(err, result) {
+                if (err) {
+                  notificationfunc("error", 'Insufficient Funds for Transaction in your Wallet.');
+                  return;
+                } else {
+                  console.log("curreent reulst-", result);
+                  if (result + 0.001 < valuestr) {
+                    notificationfunc("error", 'Insufficient Funds for Transaction in your Wallet.');
+                    return;
+                  }
+
+                  const contract = new web3.eth.Contract(nftContract, contractAddress1);
+                  if (hexProof.length){
+                    contract.methods.mintVip(quantity, hexProof, userIndex, groupState).send({
+                      value: toWei(valuestr.toString(), "ether"),
+                      from: walletAddress
+                    })
+                    .then(data => {
+                      notificationfunc("success", 'Successfully Minted!');
+                    })
+                    .catch(err => {
+                      notificationfunc("error", err.message);
+                    })
+                  } else {
+                    notificationfunc("warning", "Please check your wallet.");
+                  }
+                }
+              });
+              
             }else {
               notificationfunc("info", "Please change the network to Ethereum Mainnet and try again...");
             }
@@ -243,7 +257,7 @@ function App() {
     const leaves = wlUsers.map(x => keccak256(x));
     const tree = new MerkleTree(leaves, keccak256);
     const root = tree.getRoot().toString('hex');
-    console.log(root);
+    console.log("roothash----", root);
 
     for (var key in silverUserList) {
       var ccAddy = silverUserList[key]
@@ -287,7 +301,7 @@ function App() {
               if (err){
                 console.log(err);
               } else {
-                let leftTokenNumber = 10101 - result;
+                let leftTokenNumber = 2000 - result;
                 if (leftTokenNumber < 0) leftTokenNumber = 0;
                 setLeftToken(leftTokenNumber);
               }
@@ -298,19 +312,19 @@ function App() {
     }
 
     // console.log(new Date("Jan 29 2022 09:00:00 GMT-04").getTime() + 72 * 3600 * 1000);
-    console.log(new Date(moment("Jan 29 2022 09:00:00 GMT-04")).getTime());
-    console.log(new Date('Jan 29 2022 09:00:00 GMT-0400').toString());
+    // console.log(new Date(moment("Jan 29 2022 09:00:00 GMT-04")).getTime());
+    // console.log(new Date('Jan 29 2022 09:00:00 GMT-0400').toString());
     //console.log(moment(new Date()).tz(SETTINGS.system_timezone).format('YYYY-MM-DD HH:mm'));
-    const setCalcTime = () => {
-      const remaintime = (new Date(moment("Jan 29 2022 09:00:00 GMT-04")).getTime() + 72 * 3600 * 1000 - new Date().getTime())/ 1000;
-      const timestring = Math.floor(remaintime / 3600) + ":" + Math.floor((remaintime % 3600) / 60);
-      // console.log(timestring);
-      setCountTime(timestring);
-    }
-    setCalcTime();
-    setInterval( async () => {
-      setCalcTime();
-    }, 1000 );
+    // const setCalcTime = () => {
+    //   const remaintime = (new Date(moment("Feb 2 2022 19:00:00 GMT-04")).getTime() + 30 * 3600 * 1000 - new Date().getTime())/ 1000;
+    //   const timestring = Math.floor(remaintime / 3600) + ":" + Math.floor((remaintime % 3600) / 60);
+    //   // console.log(timestring);
+    //   setCountTime(timestring);
+    // }
+    // setCalcTime();
+    // setInterval( async () => {
+    //   setCalcTime();
+    // }, 1000 );
 
   }, []);
 
@@ -336,11 +350,11 @@ function App() {
                     <label >Token:</label><span >{leftToken}</span>
                   </div>
                 </div>
-                <div className="contract-info" >
+                {/* <div className="contract-info" >
                   <div className="item" >
                     <label >Time Left : </label><span >{countTime}</span>
                   </div>
-                </div>
+                </div> */}
               </div>
               
               <input className="quantity-input" type="number" value={quantity} onChange={(e) => setQuantity(e.target.value < 0 || e.target.value > 2 ? 0  : (e.target.value).toString().length > 1 ? (e.target.value).toString()[1] : e.target.value  )} placeholder={0} min="0" max="2"/>
